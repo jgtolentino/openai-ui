@@ -1,0 +1,95 @@
+{
+  "screens": [
+    { "id":"web.dashboard","platform":"web","grid":{"columns":12,"gutter":24,"margin":24},
+      "components":[
+        { "type":"Heading","bounds":{"x":0,"y":0,"w":12,"h":60},"props":{"text":"Expense Dashboard","level":1}},
+        { "type":"StatTile","bounds":{"x":0,"y":80,"w":4,"h":120},"props":{"label":"Policy Violations","value":"0"}},
+        { "type":"StatTile","bounds":{"x":4,"y":80,"w":4,"h":120},"props":{"label":"Unmatched Card Txns","value":"0"}},
+        { "type":"Chart","bounds":{"x":0,"y":220,"w":8,"h":260},"props":{"type":"bar","series":["Meals","Travel","Lodging"]}},
+        { "type":"DataTable","bounds":{"x":0,"y":500,"w":12,"h":420},"props":{"columns":["Date","Type","Amount","Merchant","Status"]}}
+      ]
+    },
+    { "id":"web.expenses","platform":"web","grid":{"columns":12,"gutter":24,"margin":24},
+      "components":[
+        { "type":"Heading","bounds":{"x":0,"y":0,"w":12,"h":60},"props":{"text":"My Expenses","level":1}},
+        { "type":"DataTable","bounds":{"x":0,"y":80,"w":12,"h":600},"props":{"columns":["Date","Category","Amount","Merchant","Receipt","Report"]}}
+      ]
+    },
+    { "id":"web.report-builder","platform":"web","grid":{"columns":12,"gutter":24,"margin":24},
+      "components":[
+        { "type":"Heading","bounds":{"x":0,"y":0,"w":12,"h":60},"props":{"text":"Report Builder","level":1}},
+        { "type":"Card","bounds":{"x":0,"y":80,"w":8,"h":560},"props":{"title":"Line Items"}},
+        { "type":"Card","bounds":{"x":8,"y":80,"w":4,"h":560},"props":{"title":"Receipts & Policy"}}
+      ]
+    },
+    { "id":"web.approvals","platform":"web","grid":{"columns":12,"gutter":24,"margin":24},
+      "components":[
+        { "type":"Heading","bounds":{"x":0,"y":0,"w":12,"h":60},"props":{"text":"Approvals","level":1}},
+        { "type":"DataTable","bounds":{"x":0,"y":80,"w":12,"h":600},"props":{"columns":["Report","Owner","Total","Violations","Action"]}}
+      ]
+    },
+    { "id":"web.receipts","platform":"web","grid":{"columns":12,"gutter":24,"margin":24},
+      "components":[
+        { "type":"Heading","bounds":{"x":0,"y":0,"w":12,"h":60},"props":{"text":"Receipts Inbox","level":1}},
+        { "type":"DataTable","bounds":{"x":0,"y":80,"w":12,"h":600},"props":{"columns":["Uploaded","Merchant","Amount","Status","Hash"]}}
+      ]
+    },
+    { "id":"web.card-match","platform":"web","grid":{"columns":12,"gutter":24,"margin":24},
+      "components":[
+        { "type":"Heading","bounds":{"x":0,"y":0,"w":12,"h":60},"props":{"text":"Card Match","level":1}},
+        { "type":"DataTable","bounds":{"x":0,"y":80,"w":12,"h":600},"props":{"columns":["Date","Amount","Merchant","MCC","Matched","Receipt"]}}
+      ]
+    },
+    { "id":"web.policies","platform":"web","grid":{"columns":12,"gutter":24,"margin":24},
+      "components":[
+        { "type":"Heading","bounds":{"x":0,"y":0,"w":12,"h":60},"props":{"text":"Policies & Admin","level":1}},
+        { "type":"DataTable","bounds":{"x":0,"y":80,"w":12,"h":600},"props":{"columns":["Rule","Value","Severity","Edited By","Edited At"]}}
+      ]
+    },
+    { "id":"web.analytics","platform":"web","grid":{"columns":12,"gutter":24,"margin":24},
+      "components":[
+        { "type":"Heading","bounds":{"x":0,"y":0,"w":12,"h":60},"props":{"text":"Analytics Overview","level":1}},
+        { "type":"Chart","bounds":{"x":0,"y":80,"w":12,"h":420},"props":{"type":"line","series":["Spend","Policy Hits"]}}
+      ]
+    },
+
+    { "id":"mobile.home","platform":"mobile","grid":{"columns":4,"gutter":8,"margin":16},
+      "components":[
+        { "type":"Heading","bounds":{"x":0,"y":0,"w":4,"h":40},"props":{"text":"My Reports","level":2}},
+        { "type":"Card","bounds":{"x":0,"y":56,"w":4,"h":140},"props":{"title":"Current Report"}},
+        { "type":"Button","bounds":{"x":0,"y":208,"w":4,"h":44},"props":{"variant":"primary","label":"Snap Receipt"}}
+      ]
+    },
+    { "id":"mobile.snap","platform":"mobile","grid":{"columns":4,"gutter":8,"margin":16},
+      "components":[
+        { "type":"Heading","bounds":{"x":0,"y":0,"w":4,"h":40},"props":{"text":"Snap Receipt","level":2}},
+        { "type":"Card","bounds":{"x":0,"y":56,"w":4,"h":260},"props":{"title":"Camera Preview"}}
+      ]
+    },
+    { "id":"mobile.expense-detail","platform":"mobile","grid":{"columns":4,"gutter":8,"margin":16},
+      "components":[
+        { "type":"Heading","bounds":{"x":0,"y":0,"w":4,"h":40},"props":{"text":"Expense Detail","level":2}},
+        { "type":"DataTable","bounds":{"x":0,"y":56,"w":4,"h":320},"props":{"columns":["Field","Value"]}}
+      ]
+    },
+    { "id":"mobile.report-submit","platform":"mobile","grid":{"columns":4,"gutter":8,"margin":16},
+      "components":[
+        { "type":"Heading","bounds":{"x":0,"y":0,"w":4,"h":40},"props":{"text":"Submit Report","level":2}},
+        { "type":"Card","bounds":{"x":0,"y":56,"w":4,"h":220},"props":{"title":"Review & Violations"}},
+        { "type":"Button","bounds":{"x":0,"y":284,"w":4,"h":44},"props":{"variant":"primary","label":"Submit"}}
+      ]
+    },
+    { "id":"mobile.approvals","platform":"mobile","grid":{"columns":4,"gutter":8,"margin":16},
+      "components":[
+        { "type":"Heading","bounds":{"x":0,"y":0,"w":4,"h":40},"props":{"text":"Approvals","level":2}},
+        { "type":"DataTable","bounds":{"x":0,"y":56,"w":4,"h":320},"props":{"columns":["Report","Owner","Total","Violations"]}}
+      ]
+    },
+    { "id":"mobile.settings","platform":"mobile","grid":{"columns":4,"gutter":8,"margin":16},
+      "components":[
+        { "type":"Heading","bounds":{"x":0,"y":0,"w":4,"h":40},"props":{"text":"Settings","level":2}},
+        { "type":"DataTable","bounds":{"x":0,"y":56,"w":4,"h":200},"props":{"columns":["Key","Value"]}}
+      ]
+    }
+  ]
+}

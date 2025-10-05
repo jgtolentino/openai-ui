@@ -1,0 +1,7 @@
+version: 2
+snapshot:
+  widths: [375, 1280]
+  minHeight: 900
+discovery:
+  networkIdleTimeout: 250
+  allowedHostnames: [localhost]
