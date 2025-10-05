@@ -1,0 +1,10 @@
+<!doctype html>
+<html><body style="font:13px/1.4 system-ui;padding:12px;">
+  <label>Screen ID <input id="screen" style="width:260px" placeholder="web.dashboard"/></label>
+  <button id="render" style="margin-left:8px">Render</button>
+  <script>
+    document.getElementById('render').onclick = () => {
+      parent.postMessage({ pluginMessage: { type: 'render', screenId: document.getElementById('screen').value || 'web.dashboard' } }, '*');
+    };
+  </script>
+</body></html>

@@ -1,0 +1,10 @@
+{
+  "name": "Export Design Tokens → JSON",
+  "id": "export-design-tokens-json",
+  "api": "1.0.0",
+  "editorType": ["figma"],
+  "main": "dist/code.js",
+  "ui": "dist/ui.html",
+  "capabilities": ["textreview"],
+  "documentAccess": "dynamic-page"
+}

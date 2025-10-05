@@ -19,7 +19,10 @@
     "test:e2e": "playwright test",
     "percy:ci": "percy exec -- playwright test",
     "percy:local": "percy exec -- playwright test",
-    "spec:validate": "node scripts/validate/specs-ajv.mjs"
+    "spec:validate": "node scripts/validate/specs-ajv.mjs",
+    "figma:export:build": "cd tools/figma-export-tokens && pnpm i && pnpm build",
+    "figma:render:build": "cd tools/figma-plugin && pnpm i && pnpm build",
+    "figma:rest:export": "node scripts/figma-rest-export.mjs"
   },
   "prettier": {
     "trailingComma": "es5",
