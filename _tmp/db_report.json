@@ -1,0 +1,110 @@
+{
+  "missing_tables": [],
+  "missing_views": [],
+  "missing_functions": [],
+  "rls": [
+    {
+      "table": "approvals",
+      "rls_enabled": true,
+      "policies": [
+        "approvals_insert",
+        "approvals_select",
+        "approvals_update",
+        "service_role_all"
+      ]
+    },
+    {
+      "table": "audit_log",
+      "rls_enabled": true,
+      "policies": [
+        "audit_log_select",
+        "service_role_all"
+      ]
+    },
+    {
+      "table": "card_transactions",
+      "rls_enabled": true,
+      "policies": [
+        "card_transactions_insert",
+        "card_transactions_select",
+        "card_transactions_update",
+        "service_role_all"
+      ]
+    },
+    {
+      "table": "cash_advances",
+      "rls_enabled": true,
+      "policies": [
+        "cash_advances_delete",
+        "cash_advances_insert",
+        "cash_advances_select",
+        "cash_advances_update",
+        "service_role_all"
+      ]
+    },
+    {
+      "table": "corporate_cards",
+      "rls_enabled": true,
+      "policies": [
+        "corporate_cards_insert",
+        "corporate_cards_select",
+        "corporate_cards_update",
+        "service_role_all"
+      ]
+    },
+    {
+      "table": "employees",
+      "rls_enabled": true,
+      "policies": [
+        "employees_delete",
+        "employees_insert",
+        "employees_select",
+        "employees_update",
+        "service_role_all"
+      ]
+    },
+    {
+      "table": "expense_reports",
+      "rls_enabled": true,
+      "policies": [
+        "expense_reports_delete",
+        "expense_reports_insert",
+        "expense_reports_select",
+        "expense_reports_update",
+        "service_role_all"
+      ]
+    },
+    {
+      "table": "expense_types",
+      "rls_enabled": true,
+      "policies": [
+        "expense_types_delete",
+        "expense_types_insert",
+        "expense_types_select",
+        "expense_types_update",
+        "service_role_all"
+      ]
+    },
+    {
+      "table": "expenses",
+      "rls_enabled": true,
+      "policies": [
+        "expenses_delete",
+        "expenses_insert",
+        "expenses_select",
+        "expenses_update",
+        "service_role_all"
+      ]
+    },
+    {
+      "table": "receipts",
+      "rls_enabled": true,
+      "policies": [
+        "receipts_insert",
+        "receipts_select",
+        "service_role_all"
+      ]
+    }
+  ],
+  "ok": true
+}
