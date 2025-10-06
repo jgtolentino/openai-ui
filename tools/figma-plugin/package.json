@@ -1,8 +1,0 @@
-{
-  "name": "json-to-figma-wireframes",
-  "private": true,
-  "scripts": {
-    "build": "esbuild src/code.ts --outfile=dist/code.js --bundle --platform=node --format=cjs && cp src/ui.html dist/ui.html"
-  },
-  "devDependencies": { "esbuild": "0.21.5" }
-}

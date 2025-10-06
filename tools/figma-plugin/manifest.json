@@ -1,8 +1,0 @@
-{
-  "name": "JSON → Figma (Wireframes + Tokens)",
-  "id": "json-to-figma-wireframes",
-  "api": "1.0.0",
-  "editorType": ["figma"],
-  "main": "dist/code.js",
-  "ui": "dist/ui.html"
-}
