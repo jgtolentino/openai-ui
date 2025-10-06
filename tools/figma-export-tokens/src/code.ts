@@ -1,3 +1,5 @@
+export {};
+
 function rgbToHex(p:{r:number,g:number,b:number}):string{
   const to=v=>('0'+Math.round(v*255).toString(16)).slice(-2);
   return `#${to(p.r)}${to(p.g)}${to(p.b)}`.toUpperCase();

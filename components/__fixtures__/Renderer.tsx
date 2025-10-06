@@ -1,6 +1,6 @@
 import React from 'react';
 type Bounds={x:number;y:number;w:number;h:number};
-const box=(b:Bounds, extra:React.CSSProperties={})=>({position:'absolute', left:b.x, top:b.y, width:b.w, height:b.h, ...extra});
+const box=(b:Bounds, extra:React.CSSProperties={}):React.CSSProperties=>({position:'absolute' as const, left:b.x, top:b.y, width:b.w, height:b.h, ...extra});
 export function RenderComponent(c:any){
   const b:Bounds=c.bounds;
   const common={border:'1px solid var(--color-ui-border)', borderRadius:'var(--radius-md)'};
@@ -20,7 +20,7 @@ export function RenderComponent(c:any){
 export function RenderScreen({screen}:{screen:any}){
   const w = screen.platform==='mobile' ? 375 : 1280;
   const h = 900;
-  return <div style={{position:'relative', width:w, height:h, margin:'24px auto'}} aria-label={screen.id}>
+  return <div style={{position:'relative' as const, width:w, height:h, margin:'24px auto'}} aria-label={screen.id}>
     {screen.components.map((c:any,i:number)=><RenderComponent key={i} {...c}/>)}
   </div>;
 }
