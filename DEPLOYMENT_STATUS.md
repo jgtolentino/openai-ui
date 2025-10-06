@@ -8,7 +8,7 @@
 - [x] 15-box architecture fully implemented
 - [x] API v1 with DTO envelope + Idempotency-Key
 - [x] Service layer, controllers, middleware complete
-- [x] 3 CI workflows configured (db-guard, next-guard, app-ci)
+- [x] 4 CI workflows configured (db-guard, next-guard, app-ci, secrets-guard)
 - [x] Playwright conformance tests
 - [x] k6 latency budget tests
 - [x] Release v0.1.0 tagged and published
@@ -22,6 +22,7 @@
 
 ### CI/CD Status
 - ✅ **next-guard**: PASSING (Next.js version locked to 13.x)
+- ⚠️  **secrets-guard**: FAILING (GitHub secrets not configured) - blocks deployment
 - ⚠️  **db-guard**: FAILING (GitHub secrets not configured)
 - ⚠️  **app-ci**: FAILING (GitHub secrets not configured)
 
@@ -135,7 +136,7 @@ pnpm api:v1:smoke
 - **RLS**: 10/10 tables enabled
 
 ### CI/CD Workflows
-- **Configured**: 3 workflows (db-guard, next-guard, app-ci)
+- **Configured**: 4 workflows (secrets-guard, db-guard, next-guard, app-ci)
 - **Status**: Waiting for GitHub secrets
 - **Expected**: All PASSING after secrets configured
 
@@ -144,7 +145,7 @@ pnpm api:v1:smoke
 - [x] **Code Complete**: All features implemented
 - [x] **Database Ready**: Schema migrated, health passing
 - [x] **Tests Passing**: Smoke + Conformance + Latency
-- [x] **CI Configured**: 3 workflows ready
+- [x] **CI Configured**: 4 workflows ready (secrets-guard, db-guard, next-guard, app-ci)
 - [x] **Documentation**: Complete deployment guide
 - [x] **Release Tagged**: v0.1.0 published
 - [ ] **Secrets Configured**: GitHub repository secrets (manual step)
