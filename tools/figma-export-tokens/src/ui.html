@@ -1,9 +1,0 @@
-<!doctype html><html><body style="font:13px system-ui;padding:12px;">
-  <p>Open the target Figma file in Dev Mode, then click <b>Export</b>.</p>
-  <button id="go">Export</button>
-  <pre id="out" style="white-space:pre-wrap;margin-top:10px"></pre>
-  <script>
-    document.getElementById('go').onclick = () => parent.postMessage({ pluginMessage: { type: 'export' } }, '*');
-    window.onmessage = (e)=>{ if(e.data.pluginMessage?.log) document.getElementById('out').textContent = e.data.pluginMessage.log; };
-  </script>
-</body></html>
