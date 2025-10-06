@@ -22,7 +22,11 @@
     "spec:validate": "node scripts/validate/specs-ajv.mjs",
     "figma:export:build": "cd tools/figma-export-tokens && pnpm i && pnpm build",
     "figma:render:build": "cd tools/figma-plugin && pnpm i && pnpm build",
-    "figma:rest:export": "node scripts/figma-rest-export.mjs"
+    "figma:rest:export": "node scripts/figma-rest-export.mjs",
+    "db:report": "node scripts/db/report.mjs",
+    "build:deterministic": "next build",
+    "dev:strict": "NODE_ENV=development next dev -p 3001",
+    "api:v1:smoke": "bash tests/e2e/api-v1-smoke.sh http://localhost:3001"
   },
   "prettier": {
     "trailingComma": "es5",

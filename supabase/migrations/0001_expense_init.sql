@@ -6,14 +6,14 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 -- Create schema
-CREATE SCHEMA IF NOT EXISTS scout;
+-- Schema: using public
 
 -- ============================================
 -- MASTER DATA TABLES
 -- ============================================
 
 -- Employees table
-CREATE TABLE scout.employees (
+CREATE TABLE public.employees (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   employee_id TEXT NOT NULL UNIQUE,
   email TEXT NOT NULL UNIQUE,
@@ -27,22 +27,22 @@ CREATE TABLE scout.employees (
 );
 
 -- Departments table
-CREATE TABLE scout.departments (
+CREATE TABLE public.departments (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   code TEXT NOT NULL UNIQUE,
   name TEXT NOT NULL,
-  parent_id UUID REFERENCES scout.departments(id),
+  parent_id UUID REFERENCES public.departments(id),
   manager_id UUID,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- Cost centers table
-CREATE TABLE scout.cost_centers (
+CREATE TABLE public.cost_centers (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   code TEXT NOT NULL UNIQUE,
   name TEXT NOT NULL,
-  department_id UUID REFERENCES scout.departments(id),
+  department_id UUID REFERENCES public.departments(id),
   budget_amount NUMERIC(12,2),
   fiscal_year INTEGER NOT NULL,
   status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'inactive', 'closed')),
@@ -51,7 +51,7 @@ CREATE TABLE scout.cost_centers (
 );
 
 -- Expense types table
-CREATE TABLE scout.expense_types (
+CREATE TABLE public.expense_types (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   code TEXT NOT NULL UNIQUE,
   name TEXT NOT NULL,
@@ -65,7 +65,7 @@ CREATE TABLE scout.expense_types (
 );
 
 -- Policies table
-CREATE TABLE scout.policies (
+CREATE TABLE public.policies (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   name TEXT NOT NULL,
   version TEXT NOT NULL,
@@ -83,10 +83,10 @@ CREATE TABLE scout.policies (
 -- ============================================
 
 -- Expense reports table
-CREATE TABLE scout.expense_reports (
+CREATE TABLE public.expense_reports (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   report_number TEXT NOT NULL UNIQUE,
-  employee_id UUID NOT NULL REFERENCES scout.employees(id),
+  employee_id UUID NOT NULL REFERENCES public.employees(id),
   title TEXT NOT NULL,
   description TEXT,
   purpose TEXT NOT NULL,
@@ -96,7 +96,7 @@ CREATE TABLE scout.expense_reports (
   status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'submitted', 'approved', 'rejected', 'paid', 'cancelled')),
   submitted_at TIMESTAMPTZ,
   approved_at TIMESTAMPTZ,
-  approved_by UUID REFERENCES scout.employees(id),
+  approved_by UUID REFERENCES public.employees(id),
   paid_at TIMESTAMPTZ,
   rejection_reason TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -104,11 +104,11 @@ CREATE TABLE scout.expense_reports (
 );
 
 -- Expenses table
-CREATE TABLE scout.expenses (
+CREATE TABLE public.expenses (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  report_id UUID NOT NULL REFERENCES scout.expense_reports(id) ON DELETE CASCADE,
-  expense_type_id UUID NOT NULL REFERENCES scout.expense_types(id),
-  cost_center_id UUID REFERENCES scout.cost_centers(id),
+  report_id UUID NOT NULL REFERENCES public.expense_reports(id) ON DELETE CASCADE,
+  expense_type_id UUID NOT NULL REFERENCES public.expense_types(id),
+  cost_center_id UUID REFERENCES public.cost_centers(id),
   transaction_date DATE NOT NULL,
   vendor TEXT NOT NULL,
   description TEXT NOT NULL,
@@ -126,10 +126,10 @@ CREATE TABLE scout.expenses (
 );
 
 -- Cash advances table
-CREATE TABLE scout.cash_advances (
+CREATE TABLE public.cash_advances (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   advance_number TEXT NOT NULL UNIQUE,
-  employee_id UUID NOT NULL REFERENCES scout.employees(id),
+  employee_id UUID NOT NULL REFERENCES public.employees(id),
   purpose TEXT NOT NULL,
   requested_amount NUMERIC(12,2) NOT NULL CHECK (requested_amount > 0),
   approved_amount NUMERIC(12,2),
@@ -137,52 +137,52 @@ CREATE TABLE scout.cash_advances (
   needed_by DATE NOT NULL,
   status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected', 'disbursed', 'liquidated', 'cancelled')),
   approved_at TIMESTAMPTZ,
-  approved_by UUID REFERENCES scout.employees(id),
+  approved_by UUID REFERENCES public.employees(id),
   disbursed_at TIMESTAMPTZ,
   liquidated_at TIMESTAMPTZ,
-  liquidation_report_id UUID REFERENCES scout.expense_reports(id),
+  liquidation_report_id UUID REFERENCES public.expense_reports(id),
   rejection_reason TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- Approvals table
-CREATE TABLE scout.approvals (
+CREATE TABLE public.approvals (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   entity_type TEXT NOT NULL CHECK (entity_type IN ('expense_report', 'cash_advance')),
   entity_id UUID NOT NULL,
-  approver_id UUID NOT NULL REFERENCES scout.employees(id),
+  approver_id UUID NOT NULL REFERENCES public.employees(id),
   level INTEGER NOT NULL,
   status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected', 'delegated')),
   decision_date TIMESTAMPTZ,
   comments TEXT,
-  delegated_to UUID REFERENCES scout.employees(id),
+  delegated_to UUID REFERENCES public.employees(id),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- Receipts table
-CREATE TABLE scout.receipts (
+CREATE TABLE public.receipts (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  expense_id UUID REFERENCES scout.expenses(id) ON DELETE SET NULL,
+  expense_id UUID REFERENCES public.expenses(id) ON DELETE SET NULL,
   storage_path TEXT NOT NULL,
   file_name TEXT NOT NULL,
   file_type TEXT NOT NULL,
   file_size INTEGER NOT NULL,
   ocr_data JSONB,
   ocr_confidence NUMERIC(5,4),
-  uploaded_by UUID NOT NULL REFERENCES scout.employees(id),
+  uploaded_by UUID NOT NULL REFERENCES public.employees(id),
   uploaded_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   verified BOOLEAN NOT NULL DEFAULT false,
   verified_at TIMESTAMPTZ,
-  verified_by UUID REFERENCES scout.employees(id)
+  verified_by UUID REFERENCES public.employees(id)
 );
 
 -- Corporate cards table
-CREATE TABLE scout.corporate_cards (
+CREATE TABLE public.corporate_cards (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   card_number_last4 TEXT NOT NULL,
-  card_holder_id UUID NOT NULL REFERENCES scout.employees(id),
+  card_holder_id UUID NOT NULL REFERENCES public.employees(id),
   card_type TEXT NOT NULL CHECK (card_type IN ('physical', 'virtual')),
   issuer TEXT NOT NULL,
   credit_limit NUMERIC(12,2),
@@ -194,29 +194,29 @@ CREATE TABLE scout.corporate_cards (
 );
 
 -- Card transactions table
-CREATE TABLE scout.card_transactions (
+CREATE TABLE public.card_transactions (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  card_id UUID NOT NULL REFERENCES scout.corporate_cards(id),
+  card_id UUID NOT NULL REFERENCES public.corporate_cards(id),
   transaction_date TIMESTAMPTZ NOT NULL,
   merchant TEXT NOT NULL,
   amount NUMERIC(12,2) NOT NULL,
   currency TEXT NOT NULL DEFAULT 'PHP',
   description TEXT,
   category TEXT,
-  matched_expense_id UUID REFERENCES scout.expenses(id),
+  matched_expense_id UUID REFERENCES public.expenses(id),
   matched_at TIMESTAMPTZ,
-  matched_by UUID REFERENCES scout.employees(id),
+  matched_by UUID REFERENCES public.employees(id),
   import_batch_id UUID,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- Audit log table
-CREATE TABLE scout.audit_log (
+CREATE TABLE public.audit_log (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   entity_type TEXT NOT NULL,
   entity_id UUID NOT NULL,
   action TEXT NOT NULL CHECK (action IN ('create', 'update', 'delete', 'approve', 'reject', 'submit')),
-  user_id UUID NOT NULL REFERENCES scout.employees(id),
+  user_id UUID NOT NULL REFERENCES public.employees(id),
   changes JSONB,
   ip_address INET,
   user_agent TEXT,
@@ -227,68 +227,68 @@ CREATE TABLE scout.audit_log (
 -- INDEXES
 -- ============================================
 
-CREATE INDEX idx_employees_department ON scout.employees(department_id);
-CREATE INDEX idx_employees_manager ON scout.employees(manager_id);
-CREATE INDEX idx_employees_status ON scout.employees(status);
+CREATE INDEX idx_employees_department ON public.employees(department_id);
+CREATE INDEX idx_employees_manager ON public.employees(manager_id);
+CREATE INDEX idx_employees_status ON public.employees(status);
 
-CREATE INDEX idx_departments_parent ON scout.departments(parent_id);
-CREATE INDEX idx_cost_centers_department ON scout.cost_centers(department_id);
-CREATE INDEX idx_cost_centers_fiscal_year ON scout.cost_centers(fiscal_year);
+CREATE INDEX idx_departments_parent ON public.departments(parent_id);
+CREATE INDEX idx_cost_centers_department ON public.cost_centers(department_id);
+CREATE INDEX idx_cost_centers_fiscal_year ON public.cost_centers(fiscal_year);
 
-CREATE INDEX idx_expense_reports_employee ON scout.expense_reports(employee_id);
-CREATE INDEX idx_expense_reports_status ON scout.expense_reports(status);
-CREATE INDEX idx_expense_reports_dates ON scout.expense_reports(period_start, period_end);
+CREATE INDEX idx_expense_reports_employee ON public.expense_reports(employee_id);
+CREATE INDEX idx_expense_reports_status ON public.expense_reports(status);
+CREATE INDEX idx_expense_reports_dates ON public.expense_reports(period_start, period_end);
 
-CREATE INDEX idx_expenses_report ON scout.expenses(report_id);
-CREATE INDEX idx_expenses_type ON scout.expenses(expense_type_id);
-CREATE INDEX idx_expenses_cost_center ON scout.expenses(cost_center_id);
-CREATE INDEX idx_expenses_date ON scout.expenses(transaction_date);
+CREATE INDEX idx_expenses_report ON public.expenses(report_id);
+CREATE INDEX idx_expenses_type ON public.expenses(expense_type_id);
+CREATE INDEX idx_expenses_cost_center ON public.expenses(cost_center_id);
+CREATE INDEX idx_expenses_date ON public.expenses(transaction_date);
 
-CREATE INDEX idx_cash_advances_employee ON scout.cash_advances(employee_id);
-CREATE INDEX idx_cash_advances_status ON scout.cash_advances(status);
+CREATE INDEX idx_cash_advances_employee ON public.cash_advances(employee_id);
+CREATE INDEX idx_cash_advances_status ON public.cash_advances(status);
 
-CREATE INDEX idx_approvals_entity ON scout.approvals(entity_type, entity_id);
-CREATE INDEX idx_approvals_approver ON scout.approvals(approver_id);
-CREATE INDEX idx_approvals_status ON scout.approvals(status);
+CREATE INDEX idx_approvals_entity ON public.approvals(entity_type, entity_id);
+CREATE INDEX idx_approvals_approver ON public.approvals(approver_id);
+CREATE INDEX idx_approvals_status ON public.approvals(status);
 
-CREATE INDEX idx_receipts_expense ON scout.receipts(expense_id);
-CREATE INDEX idx_card_transactions_card ON scout.card_transactions(card_id);
-CREATE INDEX idx_card_transactions_matched ON scout.card_transactions(matched_expense_id);
+CREATE INDEX idx_receipts_expense ON public.receipts(expense_id);
+CREATE INDEX idx_card_transactions_card ON public.card_transactions(card_id);
+CREATE INDEX idx_card_transactions_matched ON public.card_transactions(matched_expense_id);
 
-CREATE INDEX idx_audit_log_entity ON scout.audit_log(entity_type, entity_id);
-CREATE INDEX idx_audit_log_user ON scout.audit_log(user_id);
-CREATE INDEX idx_audit_log_created ON scout.audit_log(created_at DESC);
+CREATE INDEX idx_audit_log_entity ON public.audit_log(entity_type, entity_id);
+CREATE INDEX idx_audit_log_user ON public.audit_log(user_id);
+CREATE INDEX idx_audit_log_created ON public.audit_log(created_at DESC);
 
 -- ============================================
 -- HELPER FUNCTIONS
 -- ============================================
 
 -- Function to get current employee role
-CREATE OR REPLACE FUNCTION scout.current_employee_role()
+CREATE OR REPLACE FUNCTION public.current_employee_role()
 RETURNS TEXT
 LANGUAGE sql
 STABLE
 AS $$
-  SELECT role FROM scout.employees WHERE email = auth.jwt()->>'email' LIMIT 1;
+  SELECT role FROM public.employees WHERE email = auth.jwt()->>'email' LIMIT 1;
 $$;
 
 -- Function to calculate report total
-CREATE OR REPLACE FUNCTION scout.sum_report_amount(report_id UUID)
+CREATE OR REPLACE FUNCTION public.sum_report_amount(report_id UUID)
 RETURNS NUMERIC(12,2)
 LANGUAGE sql
 STABLE
 AS $$
-  SELECT COALESCE(SUM(amount), 0) FROM scout.expenses WHERE report_id = $1;
+  SELECT COALESCE(SUM(amount), 0) FROM public.expenses WHERE report_id = $1;
 $$;
 
 -- Trigger to update expense report total
-CREATE OR REPLACE FUNCTION scout.update_report_total()
+CREATE OR REPLACE FUNCTION public.update_report_total()
 RETURNS TRIGGER
 LANGUAGE plpgsql
 AS $$
 BEGIN
-  UPDATE scout.expense_reports
-  SET total_amount = scout.sum_report_amount(NEW.report_id),
+  UPDATE public.expense_reports
+  SET total_amount = public.sum_report_amount(NEW.report_id),
       updated_at = NOW()
   WHERE id = NEW.report_id;
   RETURN NEW;
@@ -296,12 +296,12 @@ END;
 $$;
 
 CREATE TRIGGER trg_update_report_total
-AFTER INSERT OR UPDATE OR DELETE ON scout.expenses
+AFTER INSERT OR UPDATE OR DELETE ON public.expenses
 FOR EACH ROW
-EXECUTE FUNCTION scout.update_report_total();
+EXECUTE FUNCTION public.update_report_total();
 
 -- Trigger to update timestamps
-CREATE OR REPLACE FUNCTION scout.update_timestamp()
+CREATE OR REPLACE FUNCTION public.update_timestamp()
 RETURNS TRIGGER
 LANGUAGE plpgsql
 AS $$
@@ -311,177 +311,177 @@ BEGIN
 END;
 $$;
 
-CREATE TRIGGER trg_employees_timestamp BEFORE UPDATE ON scout.employees FOR EACH ROW EXECUTE FUNCTION scout.update_timestamp();
-CREATE TRIGGER trg_departments_timestamp BEFORE UPDATE ON scout.departments FOR EACH ROW EXECUTE FUNCTION scout.update_timestamp();
-CREATE TRIGGER trg_cost_centers_timestamp BEFORE UPDATE ON scout.cost_centers FOR EACH ROW EXECUTE FUNCTION scout.update_timestamp();
-CREATE TRIGGER trg_expense_types_timestamp BEFORE UPDATE ON scout.expense_types FOR EACH ROW EXECUTE FUNCTION scout.update_timestamp();
-CREATE TRIGGER trg_policies_timestamp BEFORE UPDATE ON scout.policies FOR EACH ROW EXECUTE FUNCTION scout.update_timestamp();
-CREATE TRIGGER trg_expense_reports_timestamp BEFORE UPDATE ON scout.expense_reports FOR EACH ROW EXECUTE FUNCTION scout.update_timestamp();
-CREATE TRIGGER trg_expenses_timestamp BEFORE UPDATE ON scout.expenses FOR EACH ROW EXECUTE FUNCTION scout.update_timestamp();
-CREATE TRIGGER trg_cash_advances_timestamp BEFORE UPDATE ON scout.cash_advances FOR EACH ROW EXECUTE FUNCTION scout.update_timestamp();
-CREATE TRIGGER trg_approvals_timestamp BEFORE UPDATE ON scout.approvals FOR EACH ROW EXECUTE FUNCTION scout.update_timestamp();
-CREATE TRIGGER trg_corporate_cards_timestamp BEFORE UPDATE ON scout.corporate_cards FOR EACH ROW EXECUTE FUNCTION scout.update_timestamp();
+CREATE TRIGGER trg_employees_timestamp BEFORE UPDATE ON public.employees FOR EACH ROW EXECUTE FUNCTION public.update_timestamp();
+CREATE TRIGGER trg_departments_timestamp BEFORE UPDATE ON public.departments FOR EACH ROW EXECUTE FUNCTION public.update_timestamp();
+CREATE TRIGGER trg_cost_centers_timestamp BEFORE UPDATE ON public.cost_centers FOR EACH ROW EXECUTE FUNCTION public.update_timestamp();
+CREATE TRIGGER trg_expense_types_timestamp BEFORE UPDATE ON public.expense_types FOR EACH ROW EXECUTE FUNCTION public.update_timestamp();
+CREATE TRIGGER trg_policies_timestamp BEFORE UPDATE ON public.policies FOR EACH ROW EXECUTE FUNCTION public.update_timestamp();
+CREATE TRIGGER trg_expense_reports_timestamp BEFORE UPDATE ON public.expense_reports FOR EACH ROW EXECUTE FUNCTION public.update_timestamp();
+CREATE TRIGGER trg_expenses_timestamp BEFORE UPDATE ON public.expenses FOR EACH ROW EXECUTE FUNCTION public.update_timestamp();
+CREATE TRIGGER trg_cash_advances_timestamp BEFORE UPDATE ON public.cash_advances FOR EACH ROW EXECUTE FUNCTION public.update_timestamp();
+CREATE TRIGGER trg_approvals_timestamp BEFORE UPDATE ON public.approvals FOR EACH ROW EXECUTE FUNCTION public.update_timestamp();
+CREATE TRIGGER trg_corporate_cards_timestamp BEFORE UPDATE ON public.corporate_cards FOR EACH ROW EXECUTE FUNCTION public.update_timestamp();
 
 -- ============================================
 -- ROW LEVEL SECURITY (RLS) POLICIES
 -- ============================================
 
 -- Enable RLS on all tables
-ALTER TABLE scout.employees ENABLE ROW LEVEL SECURITY;
-ALTER TABLE scout.departments ENABLE ROW LEVEL SECURITY;
-ALTER TABLE scout.cost_centers ENABLE ROW LEVEL SECURITY;
-ALTER TABLE scout.expense_types ENABLE ROW LEVEL SECURITY;
-ALTER TABLE scout.policies ENABLE ROW LEVEL SECURITY;
-ALTER TABLE scout.expense_reports ENABLE ROW LEVEL SECURITY;
-ALTER TABLE scout.expenses ENABLE ROW LEVEL SECURITY;
-ALTER TABLE scout.cash_advances ENABLE ROW LEVEL SECURITY;
-ALTER TABLE scout.approvals ENABLE ROW LEVEL SECURITY;
-ALTER TABLE scout.receipts ENABLE ROW LEVEL SECURITY;
-ALTER TABLE scout.corporate_cards ENABLE ROW LEVEL SECURITY;
-ALTER TABLE scout.card_transactions ENABLE ROW LEVEL SECURITY;
-ALTER TABLE scout.audit_log ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.employees ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.departments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.cost_centers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.expense_types ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.policies ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.expense_reports ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.expenses ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.cash_advances ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.approvals ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.receipts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.corporate_cards ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.card_transactions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.audit_log ENABLE ROW LEVEL SECURITY;
 
 -- Employees: All authenticated users can read, only admin can modify
-CREATE POLICY employees_select ON scout.employees FOR SELECT TO authenticated USING (true);
-CREATE POLICY employees_insert ON scout.employees FOR INSERT TO authenticated WITH CHECK (scout.current_employee_role() = 'admin');
-CREATE POLICY employees_update ON scout.employees FOR UPDATE TO authenticated USING (scout.current_employee_role() = 'admin');
-CREATE POLICY employees_delete ON scout.employees FOR DELETE TO authenticated USING (scout.current_employee_role() = 'admin');
+CREATE POLICY employees_select ON public.employees FOR SELECT TO authenticated USING (true);
+CREATE POLICY employees_insert ON public.employees FOR INSERT TO authenticated WITH CHECK (public.current_employee_role() = 'admin');
+CREATE POLICY employees_update ON public.employees FOR UPDATE TO authenticated USING (public.current_employee_role() = 'admin');
+CREATE POLICY employees_delete ON public.employees FOR DELETE TO authenticated USING (public.current_employee_role() = 'admin');
 
 -- Departments: All authenticated users can read, only admin can modify
-CREATE POLICY departments_select ON scout.departments FOR SELECT TO authenticated USING (true);
-CREATE POLICY departments_insert ON scout.departments FOR INSERT TO authenticated WITH CHECK (scout.current_employee_role() = 'admin');
-CREATE POLICY departments_update ON scout.departments FOR UPDATE TO authenticated USING (scout.current_employee_role() = 'admin');
-CREATE POLICY departments_delete ON scout.departments FOR DELETE TO authenticated USING (scout.current_employee_role() = 'admin');
+CREATE POLICY departments_select ON public.departments FOR SELECT TO authenticated USING (true);
+CREATE POLICY departments_insert ON public.departments FOR INSERT TO authenticated WITH CHECK (public.current_employee_role() = 'admin');
+CREATE POLICY departments_update ON public.departments FOR UPDATE TO authenticated USING (public.current_employee_role() = 'admin');
+CREATE POLICY departments_delete ON public.departments FOR DELETE TO authenticated USING (public.current_employee_role() = 'admin');
 
 -- Cost centers: All authenticated users can read, only finance/admin can modify
-CREATE POLICY cost_centers_select ON scout.cost_centers FOR SELECT TO authenticated USING (true);
-CREATE POLICY cost_centers_insert ON scout.cost_centers FOR INSERT TO authenticated WITH CHECK (scout.current_employee_role() IN ('finance', 'admin'));
-CREATE POLICY cost_centers_update ON scout.cost_centers FOR UPDATE TO authenticated USING (scout.current_employee_role() IN ('finance', 'admin'));
-CREATE POLICY cost_centers_delete ON scout.cost_centers FOR DELETE TO authenticated USING (scout.current_employee_role() IN ('finance', 'admin'));
+CREATE POLICY cost_centers_select ON public.cost_centers FOR SELECT TO authenticated USING (true);
+CREATE POLICY cost_centers_insert ON public.cost_centers FOR INSERT TO authenticated WITH CHECK (public.current_employee_role() IN ('finance', 'admin'));
+CREATE POLICY cost_centers_update ON public.cost_centers FOR UPDATE TO authenticated USING (public.current_employee_role() IN ('finance', 'admin'));
+CREATE POLICY cost_centers_delete ON public.cost_centers FOR DELETE TO authenticated USING (public.current_employee_role() IN ('finance', 'admin'));
 
 -- Expense types: All can read, only finance/admin can modify
-CREATE POLICY expense_types_select ON scout.expense_types FOR SELECT TO authenticated USING (true);
-CREATE POLICY expense_types_insert ON scout.expense_types FOR INSERT TO authenticated WITH CHECK (scout.current_employee_role() IN ('finance', 'admin'));
-CREATE POLICY expense_types_update ON scout.expense_types FOR UPDATE TO authenticated USING (scout.current_employee_role() IN ('finance', 'admin'));
-CREATE POLICY expense_types_delete ON scout.expense_types FOR DELETE TO authenticated USING (scout.current_employee_role() IN ('finance', 'admin'));
+CREATE POLICY expense_types_select ON public.expense_types FOR SELECT TO authenticated USING (true);
+CREATE POLICY expense_types_insert ON public.expense_types FOR INSERT TO authenticated WITH CHECK (public.current_employee_role() IN ('finance', 'admin'));
+CREATE POLICY expense_types_update ON public.expense_types FOR UPDATE TO authenticated USING (public.current_employee_role() IN ('finance', 'admin'));
+CREATE POLICY expense_types_delete ON public.expense_types FOR DELETE TO authenticated USING (public.current_employee_role() IN ('finance', 'admin'));
 
 -- Policies: All can read, only admin can modify
-CREATE POLICY policies_select ON scout.policies FOR SELECT TO authenticated USING (true);
-CREATE POLICY policies_insert ON scout.policies FOR INSERT TO authenticated WITH CHECK (scout.current_employee_role() = 'admin');
-CREATE POLICY policies_update ON scout.policies FOR UPDATE TO authenticated USING (scout.current_employee_role() = 'admin');
-CREATE POLICY policies_delete ON scout.policies FOR DELETE TO authenticated USING (scout.current_employee_role() = 'admin');
+CREATE POLICY policies_select ON public.policies FOR SELECT TO authenticated USING (true);
+CREATE POLICY policies_insert ON public.policies FOR INSERT TO authenticated WITH CHECK (public.current_employee_role() = 'admin');
+CREATE POLICY policies_update ON public.policies FOR UPDATE TO authenticated USING (public.current_employee_role() = 'admin');
+CREATE POLICY policies_delete ON public.policies FOR DELETE TO authenticated USING (public.current_employee_role() = 'admin');
 
 -- Expense reports: Users can see own reports, approvers/finance/admin can see all
-CREATE POLICY expense_reports_select ON scout.expense_reports FOR SELECT TO authenticated USING (
-  employee_id IN (SELECT id FROM scout.employees WHERE email = auth.jwt()->>'email')
-  OR scout.current_employee_role() IN ('approver', 'finance', 'admin')
+CREATE POLICY expense_reports_select ON public.expense_reports FOR SELECT TO authenticated USING (
+  employee_id IN (SELECT id FROM public.employees WHERE email = auth.jwt()->>'email')
+  OR public.current_employee_role() IN ('approver', 'finance', 'admin')
 );
-CREATE POLICY expense_reports_insert ON scout.expense_reports FOR INSERT TO authenticated WITH CHECK (
-  employee_id IN (SELECT id FROM scout.employees WHERE email = auth.jwt()->>'email')
+CREATE POLICY expense_reports_insert ON public.expense_reports FOR INSERT TO authenticated WITH CHECK (
+  employee_id IN (SELECT id FROM public.employees WHERE email = auth.jwt()->>'email')
 );
-CREATE POLICY expense_reports_update ON scout.expense_reports FOR UPDATE TO authenticated USING (
-  employee_id IN (SELECT id FROM scout.employees WHERE email = auth.jwt()->>'email')
-  OR scout.current_employee_role() IN ('approver', 'finance', 'admin')
+CREATE POLICY expense_reports_update ON public.expense_reports FOR UPDATE TO authenticated USING (
+  employee_id IN (SELECT id FROM public.employees WHERE email = auth.jwt()->>'email')
+  OR public.current_employee_role() IN ('approver', 'finance', 'admin')
 );
-CREATE POLICY expense_reports_delete ON scout.expense_reports FOR DELETE TO authenticated USING (
-  employee_id IN (SELECT id FROM scout.employees WHERE email = auth.jwt()->>'email')
+CREATE POLICY expense_reports_delete ON public.expense_reports FOR DELETE TO authenticated USING (
+  employee_id IN (SELECT id FROM public.employees WHERE email = auth.jwt()->>'email')
   AND status = 'draft'
 );
 
 -- Expenses: Follow report visibility
-CREATE POLICY expenses_select ON scout.expenses FOR SELECT TO authenticated USING (
+CREATE POLICY expenses_select ON public.expenses FOR SELECT TO authenticated USING (
   report_id IN (
-    SELECT id FROM scout.expense_reports WHERE employee_id IN (SELECT id FROM scout.employees WHERE email = auth.jwt()->>'email')
+    SELECT id FROM public.expense_reports WHERE employee_id IN (SELECT id FROM public.employees WHERE email = auth.jwt()->>'email')
   )
-  OR scout.current_employee_role() IN ('approver', 'finance', 'admin')
+  OR public.current_employee_role() IN ('approver', 'finance', 'admin')
 );
-CREATE POLICY expenses_insert ON scout.expenses FOR INSERT TO authenticated WITH CHECK (
+CREATE POLICY expenses_insert ON public.expenses FOR INSERT TO authenticated WITH CHECK (
   report_id IN (
-    SELECT id FROM scout.expense_reports WHERE employee_id IN (SELECT id FROM scout.employees WHERE email = auth.jwt()->>'email')
-  )
-);
-CREATE POLICY expenses_update ON scout.expenses FOR UPDATE TO authenticated USING (
-  report_id IN (
-    SELECT id FROM scout.expense_reports WHERE employee_id IN (SELECT id FROM scout.employees WHERE email = auth.jwt()->>'email')
+    SELECT id FROM public.expense_reports WHERE employee_id IN (SELECT id FROM public.employees WHERE email = auth.jwt()->>'email')
   )
 );
-CREATE POLICY expenses_delete ON scout.expenses FOR DELETE TO authenticated USING (
+CREATE POLICY expenses_update ON public.expenses FOR UPDATE TO authenticated USING (
   report_id IN (
-    SELECT id FROM scout.expense_reports WHERE employee_id IN (SELECT id FROM scout.employees WHERE email = auth.jwt()->>'email') AND status = 'draft'
+    SELECT id FROM public.expense_reports WHERE employee_id IN (SELECT id FROM public.employees WHERE email = auth.jwt()->>'email')
+  )
+);
+CREATE POLICY expenses_delete ON public.expenses FOR DELETE TO authenticated USING (
+  report_id IN (
+    SELECT id FROM public.expense_reports WHERE employee_id IN (SELECT id FROM public.employees WHERE email = auth.jwt()->>'email') AND status = 'draft'
   )
 );
 
 -- Cash advances: Users can see own advances, approvers/finance/admin can see all
-CREATE POLICY cash_advances_select ON scout.cash_advances FOR SELECT TO authenticated USING (
-  employee_id IN (SELECT id FROM scout.employees WHERE email = auth.jwt()->>'email')
-  OR scout.current_employee_role() IN ('approver', 'finance', 'admin')
+CREATE POLICY cash_advances_select ON public.cash_advances FOR SELECT TO authenticated USING (
+  employee_id IN (SELECT id FROM public.employees WHERE email = auth.jwt()->>'email')
+  OR public.current_employee_role() IN ('approver', 'finance', 'admin')
 );
-CREATE POLICY cash_advances_insert ON scout.cash_advances FOR INSERT TO authenticated WITH CHECK (
-  employee_id IN (SELECT id FROM scout.employees WHERE email = auth.jwt()->>'email')
+CREATE POLICY cash_advances_insert ON public.cash_advances FOR INSERT TO authenticated WITH CHECK (
+  employee_id IN (SELECT id FROM public.employees WHERE email = auth.jwt()->>'email')
 );
-CREATE POLICY cash_advances_update ON scout.cash_advances FOR UPDATE TO authenticated USING (
-  employee_id IN (SELECT id FROM scout.employees WHERE email = auth.jwt()->>'email')
-  OR scout.current_employee_role() IN ('approver', 'finance', 'admin')
+CREATE POLICY cash_advances_update ON public.cash_advances FOR UPDATE TO authenticated USING (
+  employee_id IN (SELECT id FROM public.employees WHERE email = auth.jwt()->>'email')
+  OR public.current_employee_role() IN ('approver', 'finance', 'admin')
 );
-CREATE POLICY cash_advances_delete ON scout.cash_advances FOR DELETE TO authenticated USING (
-  employee_id IN (SELECT id FROM scout.employees WHERE email = auth.jwt()->>'email')
+CREATE POLICY cash_advances_delete ON public.cash_advances FOR DELETE TO authenticated USING (
+  employee_id IN (SELECT id FROM public.employees WHERE email = auth.jwt()->>'email')
   AND status = 'pending'
 );
 
 -- Approvals: Approvers can see assigned approvals, finance/admin can see all
-CREATE POLICY approvals_select ON scout.approvals FOR SELECT TO authenticated USING (
-  approver_id IN (SELECT id FROM scout.employees WHERE email = auth.jwt()->>'email')
-  OR scout.current_employee_role() IN ('finance', 'admin')
+CREATE POLICY approvals_select ON public.approvals FOR SELECT TO authenticated USING (
+  approver_id IN (SELECT id FROM public.employees WHERE email = auth.jwt()->>'email')
+  OR public.current_employee_role() IN ('finance', 'admin')
 );
-CREATE POLICY approvals_insert ON scout.approvals FOR INSERT TO authenticated WITH CHECK (scout.current_employee_role() IN ('approver', 'finance', 'admin'));
-CREATE POLICY approvals_update ON scout.approvals FOR UPDATE TO authenticated USING (
-  approver_id IN (SELECT id FROM scout.employees WHERE email = auth.jwt()->>'email')
-  OR scout.current_employee_role() IN ('finance', 'admin')
+CREATE POLICY approvals_insert ON public.approvals FOR INSERT TO authenticated WITH CHECK (public.current_employee_role() IN ('approver', 'finance', 'admin'));
+CREATE POLICY approvals_update ON public.approvals FOR UPDATE TO authenticated USING (
+  approver_id IN (SELECT id FROM public.employees WHERE email = auth.jwt()->>'email')
+  OR public.current_employee_role() IN ('finance', 'admin')
 );
 
 -- Receipts: Follow expense visibility
-CREATE POLICY receipts_select ON scout.receipts FOR SELECT TO authenticated USING (
-  uploaded_by IN (SELECT id FROM scout.employees WHERE email = auth.jwt()->>'email')
-  OR scout.current_employee_role() IN ('approver', 'finance', 'admin')
+CREATE POLICY receipts_select ON public.receipts FOR SELECT TO authenticated USING (
+  uploaded_by IN (SELECT id FROM public.employees WHERE email = auth.jwt()->>'email')
+  OR public.current_employee_role() IN ('approver', 'finance', 'admin')
 );
-CREATE POLICY receipts_insert ON scout.receipts FOR INSERT TO authenticated WITH CHECK (
-  uploaded_by IN (SELECT id FROM scout.employees WHERE email = auth.jwt()->>'email')
+CREATE POLICY receipts_insert ON public.receipts FOR INSERT TO authenticated WITH CHECK (
+  uploaded_by IN (SELECT id FROM public.employees WHERE email = auth.jwt()->>'email')
 );
 
 -- Corporate cards: Users can see own cards, finance/admin can see all
-CREATE POLICY corporate_cards_select ON scout.corporate_cards FOR SELECT TO authenticated USING (
-  card_holder_id IN (SELECT id FROM scout.employees WHERE email = auth.jwt()->>'email')
-  OR scout.current_employee_role() IN ('finance', 'admin')
+CREATE POLICY corporate_cards_select ON public.corporate_cards FOR SELECT TO authenticated USING (
+  card_holder_id IN (SELECT id FROM public.employees WHERE email = auth.jwt()->>'email')
+  OR public.current_employee_role() IN ('finance', 'admin')
 );
-CREATE POLICY corporate_cards_insert ON scout.corporate_cards FOR INSERT TO authenticated WITH CHECK (scout.current_employee_role() IN ('finance', 'admin'));
-CREATE POLICY corporate_cards_update ON scout.corporate_cards FOR UPDATE TO authenticated USING (scout.current_employee_role() IN ('finance', 'admin'));
+CREATE POLICY corporate_cards_insert ON public.corporate_cards FOR INSERT TO authenticated WITH CHECK (public.current_employee_role() IN ('finance', 'admin'));
+CREATE POLICY corporate_cards_update ON public.corporate_cards FOR UPDATE TO authenticated USING (public.current_employee_role() IN ('finance', 'admin'));
 
 -- Card transactions: Follow card visibility, finance/admin can modify
-CREATE POLICY card_transactions_select ON scout.card_transactions FOR SELECT TO authenticated USING (
-  card_id IN (SELECT id FROM scout.corporate_cards WHERE card_holder_id IN (SELECT id FROM scout.employees WHERE email = auth.jwt()->>'email'))
-  OR scout.current_employee_role() IN ('finance', 'admin')
+CREATE POLICY card_transactions_select ON public.card_transactions FOR SELECT TO authenticated USING (
+  card_id IN (SELECT id FROM public.corporate_cards WHERE card_holder_id IN (SELECT id FROM public.employees WHERE email = auth.jwt()->>'email'))
+  OR public.current_employee_role() IN ('finance', 'admin')
 );
-CREATE POLICY card_transactions_insert ON scout.card_transactions FOR INSERT TO authenticated WITH CHECK (scout.current_employee_role() IN ('finance', 'admin'));
-CREATE POLICY card_transactions_update ON scout.card_transactions FOR UPDATE TO authenticated USING (scout.current_employee_role() IN ('finance', 'admin'));
+CREATE POLICY card_transactions_insert ON public.card_transactions FOR INSERT TO authenticated WITH CHECK (public.current_employee_role() IN ('finance', 'admin'));
+CREATE POLICY card_transactions_update ON public.card_transactions FOR UPDATE TO authenticated USING (public.current_employee_role() IN ('finance', 'admin'));
 
 -- Audit log: Read-only for all authenticated, system inserts only
-CREATE POLICY audit_log_select ON scout.audit_log FOR SELECT TO authenticated USING (true);
+CREATE POLICY audit_log_select ON public.audit_log FOR SELECT TO authenticated USING (true);
 
 -- ============================================
 -- SERVICE ROLE POLICIES (Bypass RLS)
 -- ============================================
 
 -- Allow service_role to bypass RLS for all tables
-CREATE POLICY service_role_all ON scout.employees FOR ALL TO service_role USING (true) WITH CHECK (true);
-CREATE POLICY service_role_all ON scout.departments FOR ALL TO service_role USING (true) WITH CHECK (true);
-CREATE POLICY service_role_all ON scout.cost_centers FOR ALL TO service_role USING (true) WITH CHECK (true);
-CREATE POLICY service_role_all ON scout.expense_types FOR ALL TO service_role USING (true) WITH CHECK (true);
-CREATE POLICY service_role_all ON scout.policies FOR ALL TO service_role USING (true) WITH CHECK (true);
-CREATE POLICY service_role_all ON scout.expense_reports FOR ALL TO service_role USING (true) WITH CHECK (true);
-CREATE POLICY service_role_all ON scout.expenses FOR ALL TO service_role USING (true) WITH CHECK (true);
-CREATE POLICY service_role_all ON scout.cash_advances FOR ALL TO service_role USING (true) WITH CHECK (true);
-CREATE POLICY service_role_all ON scout.approvals FOR ALL TO service_role USING (true) WITH CHECK (true);
-CREATE POLICY service_role_all ON scout.receipts FOR ALL TO service_role USING (true) WITH CHECK (true);
-CREATE POLICY service_role_all ON scout.corporate_cards FOR ALL TO service_role USING (true) WITH CHECK (true);
-CREATE POLICY service_role_all ON scout.card_transactions FOR ALL TO service_role USING (true) WITH CHECK (true);
-CREATE POLICY service_role_all ON scout.audit_log FOR ALL TO service_role USING (true) WITH CHECK (true);
+CREATE POLICY service_role_all ON public.employees FOR ALL TO service_role USING (true) WITH CHECK (true);
+CREATE POLICY service_role_all ON public.departments FOR ALL TO service_role USING (true) WITH CHECK (true);
+CREATE POLICY service_role_all ON public.cost_centers FOR ALL TO service_role USING (true) WITH CHECK (true);
+CREATE POLICY service_role_all ON public.expense_types FOR ALL TO service_role USING (true) WITH CHECK (true);
+CREATE POLICY service_role_all ON public.policies FOR ALL TO service_role USING (true) WITH CHECK (true);
+CREATE POLICY service_role_all ON public.expense_reports FOR ALL TO service_role USING (true) WITH CHECK (true);
+CREATE POLICY service_role_all ON public.expenses FOR ALL TO service_role USING (true) WITH CHECK (true);
+CREATE POLICY service_role_all ON public.cash_advances FOR ALL TO service_role USING (true) WITH CHECK (true);
+CREATE POLICY service_role_all ON public.approvals FOR ALL TO service_role USING (true) WITH CHECK (true);
+CREATE POLICY service_role_all ON public.receipts FOR ALL TO service_role USING (true) WITH CHECK (true);
+CREATE POLICY service_role_all ON public.corporate_cards FOR ALL TO service_role USING (true) WITH CHECK (true);
+CREATE POLICY service_role_all ON public.card_transactions FOR ALL TO service_role USING (true) WITH CHECK (true);
+CREATE POLICY service_role_all ON public.audit_log FOR ALL TO service_role USING (true) WITH CHECK (true);
