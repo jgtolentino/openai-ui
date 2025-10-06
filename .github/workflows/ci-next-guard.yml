@@ -1,0 +1,15 @@
+name: next-guard
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enforce Next pin (13.x allowed; upgrade via PR only)
+        run: |
+          V=$(node -p "require('./package.json').dependencies?.next || ''")
+          echo "Next version: $V"
+          node -e "const v=require('./package.json').dependencies?.next||''; if(!/^\\^?13\\./.test(v)) { console.error('Next version drift: ' + v); process.exit(1); }"

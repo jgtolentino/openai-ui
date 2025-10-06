@@ -17,9 +17,6 @@ importers:
       '@supabase/supabase-js':
         specifier: ^2.13.0
         version: 2.57.4
-      '@types/react':
-        specifier: 18.0.30
-        version: 18.0.30
       '@types/react-dom':
         specifier: 18.0.11
         version: 18.0.11
@@ -101,9 +98,6 @@ importers:
       tailwindcss-animate:
         specifier: ^1.0.5
         version: 1.0.7(tailwindcss@3.4.17)
-      typescript:
-        specifier: ^4.9.5
-        version: 4.9.5
       unist-builder:
         specifier: ^3.0.1
         version: 3.0.1
@@ -141,6 +135,9 @@ importers:
       '@types/node':
         specifier: 18.15.10
         version: 18.15.10
+      '@types/react':
+        specifier: 18.0.30
+        version: 18.0.30
       '@types/yargs':
         specifier: ^17.0.24
         version: 17.0.33
@@ -168,6 +165,9 @@ importers:
       tsx:
         specifier: ^3.12.6
         version: 3.14.0
+      typescript:
+        specifier: ^4.9.5
+        version: 4.9.5
 
 packages:
 

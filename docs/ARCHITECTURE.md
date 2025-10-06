@@ -185,18 +185,14 @@ All v1 APIs: `/api/v1/*`
 ```json
 {
   "missing_tables": [],
-  "missing_views": ["expenses_view", "pending_approvals_view", "cash_advances_view"],
-  "missing_functions": [
-    "upsert_expense(...)",
-    "approve_or_reject_report(...)",
-    "create_cash_advance(...)"
-  ],
-  "rls": [...],  // All tables have RLS enabled
-  "ok": false
+  "missing_views": [],
+  "missing_functions": [],
+  "rls": [...],  // All 10 tables have RLS enabled with proper policies
+  "ok": true
 }
 ```
 
-**Note**: Missing views and functions are expected and will be implemented in future migrations.
+**Status**: ✅ All database objects created successfully. Health check passes.
 
 ## Testing
 
@@ -231,12 +227,13 @@ bash tests/e2e/api-v1-smoke.sh http://localhost:3001
 - [x] package.json scripts updated
 
 ### Pending 🟡
-- [ ] Complete views (expenses_view, approvals_view, etc.)
-- [ ] Complete RPC functions (upsert_expense, approve_or_reject_report, etc.)
+- [x] Complete views (expenses_view, payable_reimbursements_view, pending_approvals_view, cash_advances_view)
+- [x] Complete RPC functions (upsert_expense, approve_or_reject_report, create_cash_advance)
 - [ ] OCR integration (E3)
 - [ ] Rate limiting (E4)
 - [ ] Trips ICS import
 - [ ] Full E2E test coverage
+- [ ] Fix Next.js version mismatch (global vs local)
 
 ## Next Steps
 
