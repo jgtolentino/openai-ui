@@ -1,0 +1,109 @@
+openapi: 3.1.0
+info:
+  title: TBWA Expense API
+  version: 1.0.0
+  description: Expense management API for GPT Actions
+servers:
+  - url: https://xkxyvboeubffxxbebsll.supabase.co
+    description: Supabase PostgREST (read-only)
+  - url: https://openai-bo264hvgh-jake-tolentinos-projects-c0369c83.vercel.app
+    description: Next.js API (write operations)
+paths:
+  /rest/v1/expenses_view:
+    get:
+      operationId: listExpenses
+      summary: List expenses (read-only view)
+      parameters:
+        - in: query
+          name: select
+          schema:
+            type: string
+          example: "*"
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+          example: 25
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+  /api/v1/expenses:
+    post:
+      operationId: createExpense
+      summary: Create expense (write operation via Next.js)
+      servers:
+        - url: https://openai-bo264hvgh-jake-tolentinos-projects-c0369c83.vercel.app
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - employee_email
+                - expense_type
+                - txn_date
+                - amount
+                - currency
+              properties:
+                employee_email:
+                  type: string
+                  example: "jane.doe@tbwasmp.ph"
+                expense_type:
+                  type: string
+                  example: "Meals"
+                txn_date:
+                  type: string
+                  format: date
+                  example: "2025-10-07"
+                amount:
+                  type: number
+                  example: 111
+                currency:
+                  type: string
+                  example: "PHP"
+                merchant:
+                  type: string
+                  example: "Restaurant"
+                receipt_url:
+                  type: string
+                  example: "https://example.com/receipt.jpg"
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema:
+            type: string
+            minLength: 8
+          example: "gpt-action-12345678"
+      responses:
+        '200':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+components:
+  securitySchemes:
+    supabaseApiKey:
+      type: apiKey
+      in: header
+      name: apikey
+security:
+  - supabaseApiKey: []
