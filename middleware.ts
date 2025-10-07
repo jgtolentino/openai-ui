@@ -11,8 +11,8 @@ export default async function middleware(req: NextRequest) {
     return res;
   }
 
-  // Enforce Idempotency-Key
-  const key = req.headers.get('Idempotency-Key');
+  // Enforce Idempotency-Key (case-insensitive)
+  const key = req.headers.get('idempotency-key') || req.headers.get('Idempotency-Key');
   if (!key || key.trim().length < 8) {
     return NextResponse.json(
       {
