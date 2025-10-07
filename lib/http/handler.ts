@@ -26,7 +26,8 @@ export function withContracts(opts: {
       const nonGet = req.method !== 'GET';
       const wantIdem = opts.requireIdempotency ?? nonGet;
       if (wantIdem) {
-        const k = req.headers['idempotency-key'];
+        // Case-insensitive header lookup (Idempotency-Key or idempotency-key)
+        const k = req.headers['idempotency-key'] || req.headers['Idempotency-Key'];
         if (!k || typeof k !== 'string' || k.trim().length < 8) {
           throw Object.assign(new Error('Missing or too-short Idempotency-Key'), {
             status: 400,
